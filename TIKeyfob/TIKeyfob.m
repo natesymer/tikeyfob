@@ -107,12 +107,10 @@ static NSString * const KEYFOB_NAME = @"TI BLE Keyfob";
     }
     NSData *d = [NSData dataWithBytes:&buzVal length:TI_KEYFOB_PROXIMITY_ALERT_WRITE_LEN];
     [_activePeripheral writeValue:d forServiceUUID:TI_KEYFOB_PROXIMITY_ALERT_UUID characteristicUUID:TI_KEYFOB_PROXIMITY_ALERT_PROPERTY_UUID];
-    //[self writeValue:TI_KEYFOB_PROXIMITY_ALERT_UUID characteristicUUID:TI_KEYFOB_PROXIMITY_ALERT_PROPERTY_UUID p:_activePeripheral data:d];
 }
 
 - (void)readBattery {
     [_activePeripheral readValueForServiceUUID:TI_KEYFOB_BATT_SERVICE_UUID characteristicUUID:TI_KEYFOB_LEVEL_SERVICE_UUID];
-    //[self readValue:TI_KEYFOB_BATT_SERVICE_UUID characteristicUUID:TI_KEYFOB_LEVEL_SERVICE_UUID p:_activePeripheral];
 }
 
 - (void)enableAccelerometer {
@@ -148,6 +146,10 @@ static NSString * const KEYFOB_NAME = @"TI BLE Keyfob";
 - (void)disableTXPower {
     [_activePeripheral setNotifyValue:NO forServiceUUID:TI_KEYFOB_PROXIMITY_TX_PWR_SERVICE_UUID characteristicUUID:TI_KEYFOB_PROXIMITY_TX_PWR_NOTIFICATION_UUID];
 }
+
+//
+// Connection Management
+//
 
 - (BOOL)scanForBLEPeripheralsWithTimeout:(float)timeout {
     if (!_isCMReady) {
@@ -264,83 +266,73 @@ static NSString * const KEYFOB_NAME = @"TI BLE Keyfob";
     }
 }
 
-- (void)peripheral:(CBPeripheral *)peripheral didUpdateNotificationStateForCharacteristic:(CBCharacteristic *)characteristic error:(NSError *)error {}
-
 - (void)peripheral:(CBPeripheral *)peripheral didUpdateValueForCharacteristic:(CBCharacteristic *)characteristic error:(NSError *)error {
     UInt16 characteristicUUID = characteristic.UUID.intValue;
     tilog(@"Characteristic UUID: %d",characteristicUUID);
-    if (!error) {
-        tilog(@"Characteristic UUID Error'd: %d",characteristicUUID);
-        switch(characteristicUUID){
-            case TI_KEYFOB_LEVEL_SERVICE_UUID:
-            {
-                char batlevel;
-                [characteristic.value getBytes:&batlevel length:TI_KEYFOB_LEVEL_SERVICE_READ_LEN];
-                self.batteryLevel = (float)batlevel;
-                break;
+    
+    if (error) {
+        tilog(@"Error: %@",error);
+        return;
+    }
+    
+    switch (characteristicUUID) {
+        case TI_KEYFOB_LEVEL_SERVICE_UUID: {
+            char batlevel;
+            [characteristic.value getBytes:&batlevel length:TI_KEYFOB_LEVEL_SERVICE_READ_LEN];
+            self.batteryLevel = (float)batlevel;
+        } break;
+        case TI_KEYFOB_KEYS_NOTIFICATION_UUID: {
+            char keys;
+            [characteristic.value getBytes:&keys length:TI_KEYFOB_KEYS_NOTIFICATION_READ_LEN];
+            
+            BOOL tempLeftPressed = (keys & 0x01);
+            BOOL tempRightPressed = (keys & 0x02);
+            
+            if (_leftKeyBlock && tempLeftPressed != _leftButtonPressed) {
+                _leftKeyBlock((keys & 0x01));
             }
-            case TI_KEYFOB_KEYS_NOTIFICATION_UUID:
-            {
-                char keys;
-                [characteristic.value getBytes:&keys length:TI_KEYFOB_KEYS_NOTIFICATION_READ_LEN];
-                
-                BOOL tempLeftPressed = (keys & 0x01);
-                BOOL tempRightPressed = (keys & 0x02);
-                
-                if (_leftKeyBlock && tempLeftPressed != _leftButtonPressed) {
-                    _leftKeyBlock((keys & 0x01));
-                }
-                
-                if (_rightKeyBlock && tempRightPressed != _rightButtonPressed) {
-                    _rightKeyBlock((keys & 0x02));
-                }
-                
-                self.leftButtonPressed = tempLeftPressed;
-                self.rightButtonPressed = tempRightPressed;
-                break;
+            
+            if (_rightKeyBlock && tempRightPressed != _rightButtonPressed) {
+                _rightKeyBlock((keys & 0x02));
             }
-            case TI_KEYFOB_ACCEL_X_UUID:
-            {
-                char xval;
-                [characteristic.value getBytes:&xval length:TI_KEYFOB_ACCEL_READ_LEN];
-                self.x = (float)xval;
-                if (_axisMovedBlock) {
-                    _axisMovedBlock();
-                }
-                break;
+            
+            self.leftButtonPressed = tempLeftPressed;
+            self.rightButtonPressed = tempRightPressed;
+        } break;
+        case TI_KEYFOB_ACCEL_X_UUID: {
+            char xval;
+            [characteristic.value getBytes:&xval length:TI_KEYFOB_ACCEL_READ_LEN];
+            self.x = (float)xval;
+            if (_axisMovedBlock) {
+                _axisMovedBlock();
             }
-            case TI_KEYFOB_ACCEL_Y_UUID:
-            {
-                char yval;
-                [characteristic.value getBytes:&yval length:TI_KEYFOB_ACCEL_READ_LEN];
-                self.y = (float)yval;
-                if (_axisMovedBlock) {
-                    _axisMovedBlock();
-                }
-                break;
+        } break;
+        case TI_KEYFOB_ACCEL_Y_UUID: {
+            char yval;
+            [characteristic.value getBytes:&yval length:TI_KEYFOB_ACCEL_READ_LEN];
+            self.y = (float)yval;
+            if (_axisMovedBlock) {
+                _axisMovedBlock();
             }
-            case TI_KEYFOB_ACCEL_Z_UUID:
-            {
-                char zval;
-                [characteristic.value getBytes:&zval length:TI_KEYFOB_ACCEL_READ_LEN];
-                self.z = (float)zval;
-                if (_axisMovedBlock) {
-                    _axisMovedBlock();
-                }
-                break;
+        } break;
+        case TI_KEYFOB_ACCEL_Z_UUID: {
+            char zval;
+            [characteristic.value getBytes:&zval length:TI_KEYFOB_ACCEL_READ_LEN];
+            self.z = (float)zval;
+            if (_axisMovedBlock) {
+                _axisMovedBlock();
             }
-            case TI_KEYFOB_PROXIMITY_TX_PWR_NOTIFICATION_UUID:
-            {
-                char TXLevel;
-                [characteristic.value getBytes:&TXLevel length:TI_KEYFOB_PROXIMITY_TX_PWR_NOTIFICATION_READ_LEN];
-                self.TXPwrLevel = (float)TXLevel;
-            }
-            default:
-            {
-                break;
-            }
-        }
+        } break;
+        case TI_KEYFOB_PROXIMITY_TX_PWR_NOTIFICATION_UUID: {
+            char TXLevel;
+            [characteristic.value getBytes:&TXLevel length:TI_KEYFOB_PROXIMITY_TX_PWR_NOTIFICATION_READ_LEN];
+            self.TXPwrLevel = (float)TXLevel;
+        } break;
+        default:
+            break;
     }
 }
+
+- (void)peripheral:(CBPeripheral *)peripheral didUpdateNotificationStateForCharacteristic:(CBCharacteristic *)characteristic error:(NSError *)error {}
 
 @end
