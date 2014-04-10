@@ -8,4 +8,6 @@
 
 #import <Foundation/Foundation.h>
 
+#define TI_DEBUG 1
+
 void tilog(NSString *text, ...);

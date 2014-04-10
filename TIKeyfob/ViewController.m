@@ -53,19 +53,23 @@
     TIKeyfob.shared.keyfobPairedBlock = ^{
         [TIKeyfob.shared enableButtons];
         [TIKeyfob.shared enableAccelerometer];
-      //  TIKeyfob.shared.buzzerVolume = TIKeyfobBuzzerVolumeHigh;
+        TIKeyfob.shared.buzzerVolume = TIKeyfobBuzzerVolumeHigh;
     };
     
     TIKeyfob.shared.leftKeyBlock = ^(BOOL pressed){
-       // TIKeyfob.shared.buzzerVolume = pressed?TIKeyfobBuzzerVolumeLow:TIKeyfobBuzzerVolumeOff;
+        TIKeyfob.shared.buzzerVolume = pressed?TIKeyfobBuzzerVolumeLow:TIKeyfobBuzzerVolumeOff;
         _leftButton.backgroundColor = pressed?[UIColor greenColor]:[UIColor whiteColor];
         [self sendNotifWithText:@"Left button pressed."];
     };
     
     TIKeyfob.shared.rightKeyBlock = ^(BOOL pressed){
         [self sendNotifWithText:@"Right button pressed."];
-     //   TIKeyfob.shared.buzzerVolume = pressed?TIKeyfobBuzzerVolumeHigh:TIKeyfobBuzzerVolumeOff;
+        TIKeyfob.shared.buzzerVolume = pressed?TIKeyfobBuzzerVolumeHigh:TIKeyfobBuzzerVolumeOff;
         _rightButton.backgroundColor = pressed?[UIColor greenColor]:[UIColor whiteColor];
+    };
+    
+    TIKeyfob.shared.axisMovedBlock = ^{
+        NSLog(@"(%f, %f, %f)",TIKeyfob.shared.x,TIKeyfob.shared.y,TIKeyfob.shared.z);
     };
 }
 

@@ -9,8 +9,6 @@
 #import <Foundation/Foundation.h>
 #import <CoreBluetooth/CoreBluetooth.h>
 
-#define TI_DEBUG 0
-
 typedef enum {
     TIKeyfobBuzzerVolumeHigh,
     TIKeyfobBuzzerVolumeLow,

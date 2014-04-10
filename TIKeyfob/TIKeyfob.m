@@ -20,6 +20,9 @@
 
 static NSString * const KEYFOB_NAME = @"TI BLE Keyfob";
 
+// for the CC2541 keyfob:
+// http://www.ti.com/lit/ug/swru270c/swru270c.pdf
+
 #ifndef TI_BLE_Demo_TIBLECBKeyfobDefines_h
 #define TI_BLE_Demo_TIBLECBKeyfobDefines_h
 
