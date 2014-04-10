@@ -173,6 +173,10 @@ static NSString * const KEYFOB_NAME = @"TI BLE Keyfob";
 }
 
 - (BOOL)connectPeripheral:(CBPeripheral *)peripheral {
+    if (_isPaired) {
+        return NO;
+    }
+    
     if (![peripheral.name isEqualToString:KEYFOB_NAME]) {
         tilog(@"The peripheral you're trying to connect to is not a TI BLE Keyfob.");
         return NO;
@@ -240,20 +244,17 @@ static NSString * const KEYFOB_NAME = @"TI BLE Keyfob";
         return;
     }
     
-    if (_isPaired) {
-        //return;
-    }
-    
     tilog(@"Discovered characteristics.");
-    
-    for (CBService *s in peripheral.services) {
-        if ([service.UUID isEqualToUUID:s.UUID]) {
+
+    for (CBCharacteristic *c in service.characteristics) {
+        tilog(@"Found characteristic %@",c.UUID.stringValue);
+        CBService *s = peripheral.services.lastObject;
+        if ([service.UUID isEqual:s.UUID]) {
             self.isPaired = YES;
             tilog(@"Paired with %@ (%@)",_activePeripheral.name,_activePeripheral.identifier.UUIDString);
             if (_keyfobPairedBlock) {
                 _keyfobPairedBlock();
             }
-            break;
         }
     }
 }
