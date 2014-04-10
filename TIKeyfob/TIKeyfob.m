@@ -249,7 +249,7 @@ void tilog(NSString *text, ...) {
         for (int i = 0; i < _peripherals.count; i++) {
             CBPeripheral *p = _peripherals[i];
             if ([p.identifier isEqual:peripheral.identifier]) {
-                [_peripherals replaceObjectAtIndex:i withObject:peripheral];
+                _peripherals[i] = peripheral;
             }
         }
         [_peripherals addObject:peripheral];

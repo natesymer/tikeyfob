@@ -74,7 +74,7 @@
     [notification setAlertBody:text];
     [notification setFireDate:[NSDate dateWithTimeIntervalSinceNow:1]];
     [notification setTimeZone:[NSTimeZone  defaultTimeZone]];
-    [UIApplication.sharedApplication setScheduledLocalNotifications:[NSArray arrayWithObject:notification]];
+    [UIApplication.sharedApplication setScheduledLocalNotifications:@[notification]];
 }
 
 - (void)scanForFob {
