@@ -14,6 +14,7 @@
 @property (nonatomic, strong) UIView *leftButton;
 @property (nonatomic, strong) UIView *rightButton;
 @property (nonatomic, strong) UIButton *scanOrDisconnect;
+@property (nonatomic, strong) UIActivityIndicatorView *scanningActView;
 
 @end
 
@@ -30,6 +31,11 @@
     [_scanOrDisconnect addTarget:self action:@selector(scanForFob) forControlEvents:UIControlEventTouchUpInside];
     [_scanOrDisconnect setTitle:@"Scan" forState:UIControlStateNormal];
     [self.view addSubview:_scanOrDisconnect];
+    
+    self.scanningActView = [[UIActivityIndicatorView alloc]initWithActivityIndicatorStyle:UIActivityIndicatorViewStyleGray];
+    _scanningActView.center = _scanOrDisconnect.center;
+    _scanningActView.hidesWhenStopped = YES;
+    [self.view addSubview:_scanningActView];
     
     UIView *background = [[UIView alloc]initWithFrame:CGRectMake(50, 80, width-100, 300)];
     background.backgroundColor = [UIColor blackColor];
@@ -54,6 +60,10 @@
         [TIKeyfob.shared enableButtons];
         [TIKeyfob.shared enableAccelerometer];
         TIKeyfob.shared.buzzerVolume = TIKeyfobBuzzerVolumeHigh;
+        
+        _scanOrDisconnect.hidden = NO;
+        [_scanningActView stopAnimating];
+        [_scanOrDisconnect setTitle:@"Disconnect" forState:UIControlStateNormal];
     };
     
     TIKeyfob.shared.leftKeyBlock = ^(BOOL pressed){
@@ -88,7 +98,8 @@
         [_scanOrDisconnect setTitle:@"Scan" forState:UIControlStateNormal];
     } else {
         [[TIKeyfob shared]scanForBLEPeripheralsWithTimeout:30.0f];
-        [_scanOrDisconnect setTitle:@"Disconnect" forState:UIControlStateNormal];
+        _scanOrDisconnect.hidden = YES;
+        [_scanningActView startAnimating];
     }
 }
 
