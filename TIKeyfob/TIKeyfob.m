@@ -11,7 +11,14 @@
 #import <CoreBluetooth/CoreBluetooth.h>
 #import <CoreBluetooth/CBService.h>
 
-#define KEYFOB_NAME @"TI BLE Keyfob"
+// Extend CoreBluetooth
+#import "CBUUID+TIKeyfob.h"
+#import "CBPeripheral+TIKeyfob.h"
+#import "CBService+TIKeyfob.h"
+
+#import "tilog.h"
+
+static NSString * const KEYFOB_NAME = @"TI BLE Keyfob";
 
 #ifndef TI_BLE_Demo_TIBLECBKeyfobDefines_h
 #define TI_BLE_Demo_TIBLECBKeyfobDefines_h
@@ -62,15 +69,6 @@
 
 @implementation TIKeyfob
 
-void tilog(NSString *text, ...) {
-#if(TI_DEBUG)
-    va_list args;
-    va_start(args, text);
-    NSLogv([NSString stringWithFormat:@"TIKeyfob: %@",text], args);
-    va_end(args);
-#endif
-}
-
 + (TIKeyfob *)shared {
     static TIKeyfob *shared = nil;
     static dispatch_once_t onceToken;
@@ -88,6 +86,10 @@ void tilog(NSString *text, ...) {
     return self;
 }
 
+//
+// Set bluetooth device attributes
+//
+
 - (void)setBuzzerVolume:(TIKeyfobBuzzerVolume)buzzerVolume {
     Byte buzVal;
     switch (buzzerVolume) {
@@ -104,94 +106,47 @@ void tilog(NSString *text, ...) {
             break;
     }
     NSData *d = [NSData dataWithBytes:&buzVal length:TI_KEYFOB_PROXIMITY_ALERT_WRITE_LEN];
-    [self writeValue:TI_KEYFOB_PROXIMITY_ALERT_UUID characteristicUUID:TI_KEYFOB_PROXIMITY_ALERT_PROPERTY_UUID p:_activePeripheral data:d];
+    [_activePeripheral writeValue:d forServiceUUID:TI_KEYFOB_PROXIMITY_ALERT_UUID characteristicUUID:TI_KEYFOB_PROXIMITY_ALERT_PROPERTY_UUID];
+    //[self writeValue:TI_KEYFOB_PROXIMITY_ALERT_UUID characteristicUUID:TI_KEYFOB_PROXIMITY_ALERT_PROPERTY_UUID p:_activePeripheral data:d];
 }
 
 - (void)readBattery {
-    [self readValue:TI_KEYFOB_BATT_SERVICE_UUID characteristicUUID:TI_KEYFOB_LEVEL_SERVICE_UUID p:_activePeripheral];
+    [_activePeripheral readValueForServiceUUID:TI_KEYFOB_BATT_SERVICE_UUID characteristicUUID:TI_KEYFOB_LEVEL_SERVICE_UUID];
+    //[self readValue:TI_KEYFOB_BATT_SERVICE_UUID characteristicUUID:TI_KEYFOB_LEVEL_SERVICE_UUID p:_activePeripheral];
 }
 
 - (void)enableAccelerometer {
     char data = 0x01;
     NSData *d = [NSData dataWithBytes:&data length:1];
-    [self writeValue:TI_KEYFOB_ACCEL_SERVICE_UUID characteristicUUID:TI_KEYFOB_ACCEL_ENABLER_UUID p:_activePeripheral data:d];
-    [self notification:TI_KEYFOB_ACCEL_SERVICE_UUID characteristicUUID:TI_KEYFOB_ACCEL_X_UUID p:_activePeripheral on:YES];
-    [self notification:TI_KEYFOB_ACCEL_SERVICE_UUID characteristicUUID:TI_KEYFOB_ACCEL_Y_UUID p:_activePeripheral on:YES];
-    [self notification:TI_KEYFOB_ACCEL_SERVICE_UUID characteristicUUID:TI_KEYFOB_ACCEL_Z_UUID p:_activePeripheral on:YES];
+    [_activePeripheral writeValue:d forServiceUUID:TI_KEYFOB_ACCEL_SERVICE_UUID characteristicUUID:TI_KEYFOB_ACCEL_ENABLER_UUID];
+    [_activePeripheral setNotifyValue:YES forServiceUUID:TI_KEYFOB_ACCEL_SERVICE_UUID characteristicUUID:TI_KEYFOB_ACCEL_X_UUID];
+    [_activePeripheral setNotifyValue:YES forServiceUUID:TI_KEYFOB_ACCEL_SERVICE_UUID characteristicUUID:TI_KEYFOB_ACCEL_Y_UUID];
+    [_activePeripheral setNotifyValue:YES forServiceUUID:TI_KEYFOB_ACCEL_SERVICE_UUID characteristicUUID:TI_KEYFOB_ACCEL_Z_UUID];
 }
 
 - (void)disableAccelerometer {
     char data = 0x00;
     NSData *d = [NSData dataWithBytes:&data length:1];
-    [self writeValue:TI_KEYFOB_ACCEL_SERVICE_UUID characteristicUUID:TI_KEYFOB_ACCEL_ENABLER_UUID p:_activePeripheral data:d];
-    [self notification:TI_KEYFOB_ACCEL_SERVICE_UUID characteristicUUID:TI_KEYFOB_ACCEL_X_UUID p:_activePeripheral on:NO];
-    [self notification:TI_KEYFOB_ACCEL_SERVICE_UUID characteristicUUID:TI_KEYFOB_ACCEL_Y_UUID p:_activePeripheral on:NO];
-    [self notification:TI_KEYFOB_ACCEL_SERVICE_UUID characteristicUUID:TI_KEYFOB_ACCEL_Z_UUID p:_activePeripheral on:NO];
+    [_activePeripheral writeValue:d forServiceUUID:TI_KEYFOB_ACCEL_SERVICE_UUID characteristicUUID:TI_KEYFOB_ACCEL_ENABLER_UUID];
+    [_activePeripheral setNotifyValue:NO forServiceUUID:TI_KEYFOB_ACCEL_SERVICE_UUID characteristicUUID:TI_KEYFOB_ACCEL_X_UUID];
+    [_activePeripheral setNotifyValue:NO forServiceUUID:TI_KEYFOB_ACCEL_SERVICE_UUID characteristicUUID:TI_KEYFOB_ACCEL_Y_UUID];
+    [_activePeripheral setNotifyValue:NO forServiceUUID:TI_KEYFOB_ACCEL_SERVICE_UUID characteristicUUID:TI_KEYFOB_ACCEL_Z_UUID];
 }
 
 - (void)enableButtons {
-    [self notification:TI_KEYFOB_KEYS_SERVICE_UUID characteristicUUID:TI_KEYFOB_KEYS_NOTIFICATION_UUID p:_activePeripheral on:YES];
+    [_activePeripheral setNotifyValue:YES forServiceUUID:TI_KEYFOB_KEYS_SERVICE_UUID characteristicUUID:TI_KEYFOB_KEYS_NOTIFICATION_UUID];
 }
 
 - (void)disableButtons {
-    [self notification:TI_KEYFOB_KEYS_SERVICE_UUID characteristicUUID:TI_KEYFOB_KEYS_NOTIFICATION_UUID p:_activePeripheral on:NO];
+    [_activePeripheral setNotifyValue:NO forServiceUUID:TI_KEYFOB_KEYS_SERVICE_UUID characteristicUUID:TI_KEYFOB_KEYS_NOTIFICATION_UUID];
 }
 
 - (void)enableTXPower {
-    [self notification:TI_KEYFOB_PROXIMITY_TX_PWR_SERVICE_UUID characteristicUUID:TI_KEYFOB_PROXIMITY_TX_PWR_NOTIFICATION_UUID p:_activePeripheral on:YES];
+    [_activePeripheral setNotifyValue:YES forServiceUUID:TI_KEYFOB_PROXIMITY_TX_PWR_SERVICE_UUID characteristicUUID:TI_KEYFOB_PROXIMITY_TX_PWR_NOTIFICATION_UUID];
 }
 
 - (void)disableTXPower {
-    [self notification:TI_KEYFOB_PROXIMITY_TX_PWR_SERVICE_UUID characteristicUUID:TI_KEYFOB_PROXIMITY_TX_PWR_NOTIFICATION_UUID p:_activePeripheral on:NO];
-}
-
-- (void)writeValue:(int)serviceUUID characteristicUUID:(int)characteristicUUID p:(CBPeripheral *)p data:(NSData *)data {
-    CBUUID *su = [self CBUUIDWithInt:serviceUUID];
-    CBUUID *cu = [self CBUUIDWithInt:characteristicUUID];
-    
-    CBService *service = [self findServiceFromUUID:su p:p];
-    if (!service) {
-        //printf("Could not find service with UUID %s on peripheral with UUID %s\r\n",[self CBUUIDToString:su],[self UUIDToString:p.UUID]);
-        return;
-    }
-    CBCharacteristic *characteristic = [self findCharacteristicFromUUID:cu service:service];
-    if (!characteristic) {
-       // printf("Could not find characteristic with UUID %s on service with UUID %s on peripheral with UUID %s\r\n",[self CBUUIDToString:cu],[self CBUUIDToString:su],[self UUIDToString:p.UUID]);
-        return;
-    }
-    [p writeValue:data forCharacteristic:characteristic type:CBCharacteristicWriteWithoutResponse];
-}
-
-- (void)readValue:(int)serviceUUID characteristicUUID:(int)characteristicUUID p:(CBPeripheral *)p {
-    CBUUID *su = [self CBUUIDWithInt:serviceUUID];
-    CBUUID *cu = [self CBUUIDWithInt:characteristicUUID];
-    CBService *service = [self findServiceFromUUID:su p:p];
-    if (!service) {
-        tilog(@"Failed to find service %@ on peripheral %@",su,p.identifier.UUIDString);
-        return;
-    }
-    CBCharacteristic *characteristic = [self findCharacteristicFromUUID:cu service:service];
-    if (!characteristic) {
-        tilog(@"Failed to find characteristic %@ on service %@ on peripheral %@",cu,su,p.identifier.UUIDString);
-        return;
-    }
-    [p readValueForCharacteristic:characteristic];
-}
-
-- (void)notification:(int)serviceUUID characteristicUUID:(int)characteristicUUID p:(CBPeripheral *)p on:(BOOL)on {
-    CBUUID *su = [self CBUUIDWithInt:serviceUUID];
-    CBUUID *cu = [self CBUUIDWithInt:characteristicUUID];
-    CBService *service = [self findServiceFromUUID:su p:p];
-    if (!service) {
-        tilog(@"Failed to find service %@ on peripheral %@",cu,p.identifier.UUIDString);
-        return;
-    }
-    CBCharacteristic *characteristic = [self findCharacteristicFromUUID:cu service:service];
-    if (!characteristic) {
-        tilog(@"Failed to find characteristic %@ on service %@ on peripheral %@",cu,su,p.identifier.UUIDString);
-        return;
-    }
-    [p setNotifyValue:on forCharacteristic:characteristic];
+    [_activePeripheral setNotifyValue:NO forServiceUUID:TI_KEYFOB_PROXIMITY_TX_PWR_SERVICE_UUID characteristicUUID:TI_KEYFOB_PROXIMITY_TX_PWR_NOTIFICATION_UUID];
 }
 
 - (BOOL)scanForBLEPeripheralsWithTimeout:(float)timeout {
@@ -204,7 +159,7 @@ void tilog(NSString *text, ...) {
     }
     
     if (_activePeripheral && _activePeripheral.state == CBPeripheralStateConnected) {
-        [_CM cancelPeripheralConnection:_activePeripheral];
+        [self disconnect];
     }
     
     if (timeout >= 0) {
@@ -223,6 +178,12 @@ void tilog(NSString *text, ...) {
     
     [_CM connectPeripheral:peripheral options:nil];
     return YES;
+}
+
+- (void)disconnect {
+    [_CM cancelPeripheralConnection:_activePeripheral];
+    self.activePeripheral = nil;
+    self.isPaired = NO;
 }
 
 //
@@ -244,7 +205,7 @@ void tilog(NSString *text, ...) {
     }
 
     if (!_peripherals) {
-        _peripherals = [NSMutableArray arrayWithObjects:peripheral, nil];
+        self.peripherals = @[peripheral].mutableCopy;
     } else {
         for (int i = 0; i < _peripherals.count; i++) {
             CBPeripheral *p = _peripherals[i];
@@ -277,11 +238,15 @@ void tilog(NSString *text, ...) {
         return;
     }
     
+    if (_isPaired) {
+        //return;
+    }
+    
     tilog(@"Discovered characteristics.");
     
-    for (CBCharacteristic *c in service.characteristics) {
-        CBService *s = peripheral.services.lastObject;
-        if ([self compareCBUUID:service.UUID UUID2:s.UUID]) {
+    for (CBService *s in peripheral.services) {
+        if ([service.UUID isEqualToUUID:s.UUID]) {
+            self.isPaired = YES;
             tilog(@"Paired with %@ (%@)",_activePeripheral.name,_activePeripheral.identifier.UUIDString);
             if (_keyfobPairedBlock) {
                 _keyfobPairedBlock();
@@ -302,7 +267,7 @@ void tilog(NSString *text, ...) {
 - (void)peripheral:(CBPeripheral *)peripheral didUpdateNotificationStateForCharacteristic:(CBCharacteristic *)characteristic error:(NSError *)error {}
 
 - (void)peripheral:(CBPeripheral *)peripheral didUpdateValueForCharacteristic:(CBCharacteristic *)characteristic error:(NSError *)error {
-    UInt16 characteristicUUID = [self CBUUIDToInt:characteristic.UUID];
+    UInt16 characteristicUUID = characteristic.UUID.intValue;
     tilog(@"Characteristic UUID: %d",characteristicUUID);
     if (!error) {
         tilog(@"Characteristic UUID Error'd: %d",characteristicUUID);
@@ -376,48 +341,6 @@ void tilog(NSString *text, ...) {
             }
         }
     }
-}
-
-//
-// Helpers
-//
-
-- (CBUUID *)CBUUIDWithInt:(UInt16)intval {
-    UInt16 swapped = intval << 8; swapped |= (intval >> 8);
-    NSData *data = [NSData dataWithBytes:(char *)&swapped length:2];
-    return [CBUUID UUIDWithData:data];
-}
-
-- (BOOL)compareCBUUID:(CBUUID *)UUID1 UUID2:(CBUUID *)UUID2 {
-    char b1[16];
-    char b2[16];
-    [UUID1.data getBytes:b1];
-    [UUID2.data getBytes:b2];
-    return (memcmp(b1, b2, UUID1.data.length) == 0)?YES:NO;
-}
-
-- (UInt16)CBUUIDToInt:(CBUUID *)UUID {
-    char b1[16];
-    [UUID.data getBytes:b1];
-    return ((b1[0] << 8) | b1[1]);
-}
-
-- (CBService *)findServiceFromUUID:(CBUUID *)UUID p:(CBPeripheral *)p {
-    for (CBService *service in p.services) {
-        if ([self compareCBUUID:service.UUID UUID2:UUID]) {
-            return service;
-        }
-    }
-    return nil;
-}
-
-- (CBCharacteristic *)findCharacteristicFromUUID:(CBUUID *)UUID service:(CBService *)service {
-    for (CBCharacteristic *c in service.characteristics) {
-        if ([self compareCBUUID:c.UUID UUID2:UUID]) {
-            return c;
-        }
-    }
-    return nil;
 }
 
 @end

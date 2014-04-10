@@ -17,6 +17,10 @@
 		F1774AED18B2685F00483FD4 /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = F1774AEC18B2685F00483FD4 /* Images.xcassets */; };
 		F1774B0B18B2687300483FD4 /* TIKeyfob.m in Sources */ = {isa = PBXBuildFile; fileRef = F1774B0A18B2687300483FD4 /* TIKeyfob.m */; };
 		F1774B0D18B26A3100483FD4 /* CoreBluetooth.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F1774B0C18B26A3100483FD4 /* CoreBluetooth.framework */; };
+		F1D9F7BA18F63653002CEAB4 /* CBUUID+TIKeyfob.m in Sources */ = {isa = PBXBuildFile; fileRef = F1D9F7B918F63653002CEAB4 /* CBUUID+TIKeyfob.m */; };
+		F1D9F7BD18F6368E002CEAB4 /* CBPeripheral+TIKeyfob.m in Sources */ = {isa = PBXBuildFile; fileRef = F1D9F7BC18F6368E002CEAB4 /* CBPeripheral+TIKeyfob.m */; };
+		F1D9F7C018F63707002CEAB4 /* CBService+TIKeyfob.m in Sources */ = {isa = PBXBuildFile; fileRef = F1D9F7BF18F63707002CEAB4 /* CBService+TIKeyfob.m */; };
+		F1D9F7C318F638B6002CEAB4 /* tilog.m in Sources */ = {isa = PBXBuildFile; fileRef = F1D9F7C218F638B6002CEAB4 /* tilog.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -36,6 +40,14 @@
 		F1774B0918B2687300483FD4 /* TIKeyfob.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TIKeyfob.h; sourceTree = "<group>"; };
 		F1774B0A18B2687300483FD4 /* TIKeyfob.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TIKeyfob.m; sourceTree = "<group>"; };
 		F1774B0C18B26A3100483FD4 /* CoreBluetooth.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreBluetooth.framework; path = System/Library/Frameworks/CoreBluetooth.framework; sourceTree = SDKROOT; };
+		F1D9F7B818F63653002CEAB4 /* CBUUID+TIKeyfob.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "CBUUID+TIKeyfob.h"; sourceTree = "<group>"; };
+		F1D9F7B918F63653002CEAB4 /* CBUUID+TIKeyfob.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "CBUUID+TIKeyfob.m"; sourceTree = "<group>"; };
+		F1D9F7BB18F6368E002CEAB4 /* CBPeripheral+TIKeyfob.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "CBPeripheral+TIKeyfob.h"; sourceTree = "<group>"; };
+		F1D9F7BC18F6368E002CEAB4 /* CBPeripheral+TIKeyfob.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "CBPeripheral+TIKeyfob.m"; sourceTree = "<group>"; };
+		F1D9F7BE18F63707002CEAB4 /* CBService+TIKeyfob.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "CBService+TIKeyfob.h"; sourceTree = "<group>"; };
+		F1D9F7BF18F63707002CEAB4 /* CBService+TIKeyfob.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "CBService+TIKeyfob.m"; sourceTree = "<group>"; };
+		F1D9F7C218F638B6002CEAB4 /* tilog.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = tilog.m; sourceTree = "<group>"; };
+		F1D9F7C418F638BF002CEAB4 /* tilog.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = tilog.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -88,8 +100,7 @@
 				F1774AE118B2685F00483FD4 /* AppDelegate.m */,
 				F1774AE918B2685F00483FD4 /* ViewController.h */,
 				F1774AEA18B2685F00483FD4 /* ViewController.m */,
-				F1774B0918B2687300483FD4 /* TIKeyfob.h */,
-				F1774B0A18B2687300483FD4 /* TIKeyfob.m */,
+				F1D9F7C118F63829002CEAB4 /* TIKeyfob */,
 				F1774AEC18B2685F00483FD4 /* Images.xcassets */,
 				F1774AD818B2685F00483FD4 /* Supporting Files */,
 			);
@@ -105,6 +116,23 @@
 				F1774ADF18B2685F00483FD4 /* TIKeyfob-Prefix.pch */,
 			);
 			name = "Supporting Files";
+			sourceTree = "<group>";
+		};
+		F1D9F7C118F63829002CEAB4 /* TIKeyfob */ = {
+			isa = PBXGroup;
+			children = (
+				F1774B0918B2687300483FD4 /* TIKeyfob.h */,
+				F1774B0A18B2687300483FD4 /* TIKeyfob.m */,
+				F1D9F7B818F63653002CEAB4 /* CBUUID+TIKeyfob.h */,
+				F1D9F7B918F63653002CEAB4 /* CBUUID+TIKeyfob.m */,
+				F1D9F7BB18F6368E002CEAB4 /* CBPeripheral+TIKeyfob.h */,
+				F1D9F7BC18F6368E002CEAB4 /* CBPeripheral+TIKeyfob.m */,
+				F1D9F7BE18F63707002CEAB4 /* CBService+TIKeyfob.h */,
+				F1D9F7BF18F63707002CEAB4 /* CBService+TIKeyfob.m */,
+				F1D9F7C418F638BF002CEAB4 /* tilog.h */,
+				F1D9F7C218F638B6002CEAB4 /* tilog.m */,
+			);
+			name = TIKeyfob;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -183,7 +211,11 @@
 				F1774AEB18B2685F00483FD4 /* ViewController.m in Sources */,
 				F1774AE218B2685F00483FD4 /* AppDelegate.m in Sources */,
 				F1774B0B18B2687300483FD4 /* TIKeyfob.m in Sources */,
+				F1D9F7BD18F6368E002CEAB4 /* CBPeripheral+TIKeyfob.m in Sources */,
+				F1D9F7C018F63707002CEAB4 /* CBService+TIKeyfob.m in Sources */,
+				F1D9F7BA18F63653002CEAB4 /* CBUUID+TIKeyfob.m in Sources */,
 				F1774ADE18B2685F00483FD4 /* main.m in Sources */,
+				F1D9F7C318F638B6002CEAB4 /* tilog.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

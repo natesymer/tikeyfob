@@ -13,6 +13,7 @@
 
 @property (nonatomic, strong) UIView *leftButton;
 @property (nonatomic, strong) UIView *rightButton;
+@property (nonatomic, strong) UIButton *scanOrDisconnect;
 
 @end
 
@@ -24,11 +25,11 @@
     
     float width = UIScreen.mainScreen.bounds.size.width;
 
-    UIButton *button = [UIButton buttonWithType:UIButtonTypeRoundedRect];
-    button.frame = CGRectMake(0, 20, width, 44);
-    [button addTarget:self action:@selector(scanForFob) forControlEvents:UIControlEventTouchUpInside];
-    [button setTitle:@"Scan" forState:UIControlStateNormal];
-    [self.view addSubview:button];
+    self.scanOrDisconnect = [UIButton buttonWithType:UIButtonTypeRoundedRect];
+    _scanOrDisconnect.frame = CGRectMake(0, 20, width, 44);
+    [_scanOrDisconnect addTarget:self action:@selector(scanForFob) forControlEvents:UIControlEventTouchUpInside];
+    [_scanOrDisconnect setTitle:@"Scan" forState:UIControlStateNormal];
+    [self.view addSubview:_scanOrDisconnect];
     
     UIView *background = [[UIView alloc]initWithFrame:CGRectMake(50, 80, width-100, 300)];
     background.backgroundColor = [UIColor blackColor];
@@ -52,18 +53,18 @@
     TIKeyfob.shared.keyfobPairedBlock = ^{
         [TIKeyfob.shared enableButtons];
         [TIKeyfob.shared enableAccelerometer];
-        TIKeyfob.shared.buzzerVolume = TIKeyfobBuzzerVolumeHigh;
+      //  TIKeyfob.shared.buzzerVolume = TIKeyfobBuzzerVolumeHigh;
     };
     
     TIKeyfob.shared.leftKeyBlock = ^(BOOL pressed){
-        TIKeyfob.shared.buzzerVolume = pressed?TIKeyfobBuzzerVolumeLow:TIKeyfobBuzzerVolumeOff;
+       // TIKeyfob.shared.buzzerVolume = pressed?TIKeyfobBuzzerVolumeLow:TIKeyfobBuzzerVolumeOff;
         _leftButton.backgroundColor = pressed?[UIColor greenColor]:[UIColor whiteColor];
         [self sendNotifWithText:@"Left button pressed."];
     };
     
     TIKeyfob.shared.rightKeyBlock = ^(BOOL pressed){
         [self sendNotifWithText:@"Right button pressed."];
-        TIKeyfob.shared.buzzerVolume = pressed?TIKeyfobBuzzerVolumeHigh:TIKeyfobBuzzerVolumeOff;
+     //   TIKeyfob.shared.buzzerVolume = pressed?TIKeyfobBuzzerVolumeHigh:TIKeyfobBuzzerVolumeOff;
         _rightButton.backgroundColor = pressed?[UIColor greenColor]:[UIColor whiteColor];
     };
 }
@@ -78,7 +79,13 @@
 }
 
 - (void)scanForFob {
-    [[TIKeyfob shared]scanForBLEPeripheralsWithTimeout:30.0f];
+    if (TIKeyfob.shared.isPaired) {
+        [[TIKeyfob shared]disconnect];
+        [_scanOrDisconnect setTitle:@"Scan" forState:UIControlStateNormal];
+    } else {
+        [[TIKeyfob shared]scanForBLEPeripheralsWithTimeout:30.0f];
+        [_scanOrDisconnect setTitle:@"Disconnect" forState:UIControlStateNormal];
+    }
 }
 
 @end

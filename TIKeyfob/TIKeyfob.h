@@ -23,6 +23,7 @@ typedef enum {
 
 - (BOOL)scanForBLEPeripheralsWithTimeout:(float)timeout;
 - (BOOL)connectPeripheral:(CBPeripheral *)peripheral;
+- (void)disconnect;
 
 - (void)readBattery;
 - (void)enableAccelerometer;
@@ -46,5 +47,7 @@ typedef enum {
 @property (nonatomic, assign) float z;
 @property (nonatomic, assign) float batteryLevel;
 @property (nonatomic, assign) float TXPwrLevel;
+
+@property (nonatomic, assign) BOOL isPaired;
 
 @end
